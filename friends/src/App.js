@@ -1,26 +1,58 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Link, NavLink, withRouter } from 'react-router-dom';
+import { connect } from 'react-redux';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import PrivateRoute from './PrivateRoute';
+import Login from './components/Login';
+import Home from './components/HomePage';
+import FriendsPage from './components/FriendsPage';
+import AddFriendForm from './components/AddFriendForm';
+
+// import { logout } from './actions';
+
+import './styles/App.css';
+
+class App extends React.Component{
+
+  render(){
+    return (
+      <Router>
+      <div className="App">
+        <nav className="navigation-bar">
+          <div className="nav-links"> 
+          <NavLink exact to="/">Home</NavLink>
+          {this.props.isLoggedIn && (
+            <>
+              <NavLink exact to="/friends">Friends List</NavLink>
+              <NavLink to="/friends/form">Add Friend</NavLink>
+            </>
+          )}
+          </div>
+          <div>
+            {!this.props.isLoggedIn ? (
+               <Link to="/login">Log In</Link>
+            ) : <Link to="/" onClick={logout}>Log Out</Link> 
+            }
+          </div>
+        </nav>
+
+        <Route exact path='/' component={Home} />
+        <Route path="/login" component={Login} />
+        <PrivateRoute path="/friends/form" component={AddFriendForm} />
+        <PrivateRoute path="/friends" component={FriendsPage} />
+      </div>
+      </Router>
+    );
+  }
 }
 
-export default App;
+function logout() {
+  localStorage.removeItem('token')
+    window.location.reload(true);
+}
+
+const mapStateToProps = state => ({
+    isLoggedIn: state.isLoggedIn
+})
+
+export default connect(mapStateToProps, {} )(App);
